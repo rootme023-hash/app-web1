@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costuras de Amor y Vida - Yannet Vilca Huallpa</title>
+    <style>
+        /* Estilos Base */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Palatino', serif; 
+            background: radial-gradient(circle, #fff5f5 0%, #fdf2f2 100%);
+            overflow: hidden; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            perspective: 1000px;
+        }
+
+        #bg-3d {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: linear-gradient(135deg, #fdf2f2 0%, #ffdfdf 100%);
+            transition: filter 2s ease;
+        }
+
+        .bg-heart {
+            position: absolute;
+            color: rgba(214, 48, 49, 0.15);
+            user-select: none;
+            pointer-events: none;
+            animation: float3d linear infinite;
+        }
+
+        @keyframes float3d {
+            0% { transform: translateZ(0) translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateZ(200px) translateY(-20vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* CAPA INICIAL */
+        #curtain-layer {
+            position: fixed; inset: 0; background: #d63031;
+            z-index: 100; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: 1.5s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        .cover-photo-frame {
+            width: 220px; height: 220px; border-radius: 50%;
+            border: 8px solid rgba(255,255,255,0.3);
+            overflow: hidden; margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .cover-photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+        .scissors-btn {
+            cursor: pointer; font-size: 60px; background: none; border: none;
+            animation: pulse 1.5s infinite;
+            position: relative;
+        }
+
+        /* Indicador Tijeras */
+        .click-hint {
+            color: white;
+            font-size: 12px;
+            margin-top: 5px;
+            letter-spacing: 1px;
+            animation: bounce 2s infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1) rotate(-5deg); }
+        }
+
+        /* PELOTA REBOTADORA */
+        #bouncing-ball {
+            position: fixed;
+            width: 80px; height: 80px;
+            border-radius: 50%; border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            overflow: hidden; z-index: 80;
+            display: none; pointer-events: none;
+        }
+        #bouncing-ball img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* CONTENIDO PRINCIPAL */
+        .main-content {
+            text-align: center; width: 100%; height: 100vh;
+            display: none; flex-direction: column; align-items: center;
+            justify-content: center; padding: 10px;
+            z-index: 10;
+        }
+
+        .carousel-container {
+            width: 90vw; max-width: 360px; height: 60vh;
+            position: relative; perspective: 1000px; margin-bottom: 15px;
+        }
+        
+        /* Indicador de toque en carta */
+        .card-hint {
+            position: absolute;
+            top: -30px;
+            width: 100%;
+            color: #d63031;
+            font-size: 14px;
+            font-weight: bold;
+            animation: fadeInOut 2s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .photo-card {
+            width: 100%; height: 100%; position: absolute;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d; display: none; cursor: pointer;
+        }
+        .photo-card.active { display: block; }
+        .photo-card.flipped { transform: rotateY(180deg); }
+
+        .card-front, .card-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; display: flex;
+            flex-direction: column; justify-content: center;
+            align-items: center; padding: 20px;
+            background: white; border: 1px solid #ddd;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); border-radius: 8px;
+        }
+        .card-front img { width: 100%; height: 85%; object-fit: cover; border-radius: 5px; }
+        .card-front span { margin-top: 12px; color: #d63031; font-weight: bold; font-size: 0.9em; }
+        .card-back { transform: rotateY(180deg); background: #fffafa; border: 3px dashed #d63031; line-height: 1.6; }
+        .card-back p { font-style: italic; color: #444; }
+
+        .btn-stitch {
+            background: #d63031; color: white; border: none; 
+            padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer;
+            z-index: 20; box-shadow: 0 4px 15px rgba(214, 48, 49, 0.4);
+            transition: 0.3s;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(214, 48, 49, 0.4); }
+            50% { box-shadow: 0 0 20px rgba(214, 48, 49, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(214, 48, 49, 0.4); }
+        }
+
+        /* --- FINAL DRAMÁTICO --- */
+        #final-drama {
+            position: fixed; inset: 0; background: rgba(255, 255, 255, 0);
+            z-index: 200; display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: all 2s ease;
+        }
+
+        .prenda-contenedor {
+            width: 280px; height: 380px;
+            background: linear-gradient(to bottom, #d63031, #801010);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
+            position: relative; box-shadow: 0 0 50px rgba(214, 48, 49, 0.5);
+            animation: floatPrenda 4s infinite ease-in-out;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .logo-bordado {
+            width: 120px; height: 120px;
+            background: white; border-radius: 50%;
+            border: 4px double #d63031;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 50px; box-shadow: 0 0 20px rgba(255,255,255,0.8);
+        }
+
+        .nombre-homenaje {
+            margin-top: 30px; font-size: 1.8rem; font-weight: lighter;
+            letter-spacing: 5px; color: #d63031; opacity: 0;
+            transform: translateY(20px); transition: 2s all ease 1s;
+            text-align: center;
+        }
+
+        .btn-salir {
+            margin-top: 20px; padding: 10px 40px;
+            background: transparent; border: 1px solid #d63031;
+            color: #d63031; cursor: pointer; letter-spacing: 2px;
+            opacity: 0; transition: 2s all ease 2s;
+        }
+
+        @keyframes floatPrenda {
+            0%, 100% { transform: translateY(0) scale(1); filter: brightness(1); }
+            50% { transform: translateY(-20px) scale(1.05); filter: brightness(1.2); }
+        }
+
+        .floating-photo {
+            position: fixed; top: -100px; width: 45px; height: 45px;
+            border-radius: 50%; border: 2px solid white; object-fit: cover;
+            pointer-events: none; z-index: 5; animation: fall linear infinite;
+        }
+        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="bg-3d"></div>
+    <audio id="musica" loop><source src="musica.mp3" type="audio/mpeg"></audio>
+
+    <div id="bouncing-ball">
+        <img src="foto_m_i.jpeg" alt="Madre e hija">
+    </div>
+
+    <div id="curtain-layer">
+        <div class="cover-photo-frame">
+            <img src="foto.jpg" alt="Portada">
+        </div>
+        <button class="scissors-btn" onclick="openSurprise()">✂️</button>
+        <p class="click-hint">Presiona las tijeras</p>
+        <p style="color: white; margin-top: 15px; font-weight: bold; letter-spacing: 2px; font-size: 12px;">DESCUECE EL TIEMPO</p>
+    </div>
+
+    <div class="main-content" id="main">
+        <div class="carousel-container">
+            <div id="card-indicator" class="card-hint">✨ Toca la foto para leer ✨</div>
+            
+            <div class="photo-card active" onclick="flipCard(this)">
+                <div class="card-front"><img src="foto1.jpg"><span>Mi gran ejemplo ❤️</span></div>
+                <div class="card-back"><p>"Una madre remienda miedos y borda alegrías con hilos de acero y seda."</p></div>
+            </div>
+            <div class="photo-card" onclick="flipCard(this)">
+                <div class="card-front"><img src="foto2.jpg"><span>Fuerza inagotable</span></div>
+                <div class="card-back"><p>"No hay diseño más perfecto que el que has creado con tu propio esfuerzo y dedicación."</p></div>
+            </div>
+            <div class="photo-card" onclick="flipCard(this)">
+                <div class="card-front"><img src="foto3.jpg"><span>Amor sin límites</span></div>
+                <div class="card-back"><p>"Tu amor es la costura invisible que mantiene unida nuestra historia."</p></div>
+            </div>
+            <div class="photo-card" onclick="flipCard(this)">
+                <div class="card-front"><img src="foto4.jpg"><span>Paciencia de oro</span></div>
+                <div class="card-back"><p>"Supiste esperar el momento justo para ver florecer mis sueños."</p></div>
+            </div>
+            <div class="photo-card" onclick="flipCard(this)">
+                <div class="card-front"><img src="foto5.jpg"><span>Refugio seguro</span></div>
+                <div class="card-back"><p>"Tus abrazos son la tela más suave que me protege de cualquier tormenta."</p></div>
+            </div>
+            <div class="photo-card" onclick="flipCard(this)">
+                <div class="card-front"><img src="foto6.jpg"><span>Legado eterno</span></div>
+                <div class="card-back"><p>"Me enseñaste que la vida se diseña con hilos de valentía y mucha fe."</p></div>
+            </div>
+            <div class="photo-card" onclick="flipCard(this)">
+                <div class="card-front"><img src="foto7.jpg"><span>Esencia pura</span></div>
+                <div class="card-back"><p>"En cada puntada de mi camino, encuentro el rastro de tu luz divina."</p></div>
+            </div>
+        </div>
+        <button class="btn-stitch" onclick="stitchNext()">SIGUIENTE RECUERDO 🧵</button>
+    </div>
+
+    <div id="final-drama">
+        <div class="prenda-contenedor">
+            <div class="logo-bordado">👩‍👧</div>
+        </div>
+        <h2 class="nombre-homenaje" id="nombre">YANNET VILCA HUALLPA</h2>
+        <button class="btn-salir" id="btnS" onclick="location.reload()">CERRAR HISTORIA</button>
+        <p style="margin-top: 20px; font-size: 20px; color: #888;">att: Un amigo a la distancia</p>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.photo-card');
+        const ball = document.getElementById('bouncing-ball');
+        const bg3d = document.getElementById('bg-3d');
+        const misFotos = ["foto1.jpg", "foto2.jpg", "foto3.jpg", "foto4.jpg", "foto5.jpg", "foto6.jpg", "foto7.jpg", "foto.jpg"];
+
+        function create3dBG() {
+            const symbols = ["❤️", "💖", "🌸", "✨"];
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'bg-heart';
+                heart.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                heart.style.left = Math.random() * 100 + "vw";
+                heart.style.fontSize = (Math.random() * 30 + 20) + "px";
+                heart.style.animationDuration = (Math.random() * 5 + 5) + "s";
+                heart.style.animationDelay = (Math.random() * 5) + "s";
+                bg3d.appendChild(heart);
+            }
+        }
+
+        let posX = Math.random() * 200, posY = Math.random() * 200;
+        let velX = 2.5, velY = 2.5;
+        function moveBall() {
+            const ballSize = 80;
+            posX += velX; posY += velY;
+            if (posX + ballSize >= window.innerWidth || posX <= 0) velX *= -1;
+            if (posY + ballSize >= window.innerHeight || posY <= 0) velY *= -1;
+            ball.style.left = posX + "px";
+            ball.style.top = posY + "px";
+            requestAnimationFrame(moveBall);
+        }
+
+        function openSurprise() {
+            document.getElementById('curtain-layer').style.transform = "translateY(-100%)";
+            document.getElementById('main').style.display = "flex";
+            document.getElementById('musica').play().catch(() => {});
+            ball.style.display = "block";
+            create3dBG();
+            moveBall();
+            startRain();
+        }
+
+        function flipCard(card) { 
+            card.classList.toggle('flipped'); 
+            // Ocultar el indicador de "Toca la foto" después del primer uso
+            const hint = document.getElementById('card-indicator');
+            if(hint) hint.style.display = 'none';
+        }
+
+        function stitchNext() {
+            if (currentSlide < slides.length - 1) {
+                slides[currentSlide].style.transform = "translateX(-150%) rotate(-20deg)";
+                slides[currentSlide].style.opacity = "0";
+                
+                setTimeout(() => {
+                    slides[currentSlide].classList.remove('active');
+                    currentSlide++;
+                    slides[currentSlide].classList.add('active');
+                }, 400);
+            } else {
+                iniciarFinalDramatico();
+            }
+        }
+
+        function iniciarFinalDramatico() {
+            const final = document.getElementById('final-drama');
+            const main = document.getElementById('main');
+            main.style.transition = "2s";
+            main.style.opacity = "0";
+            main.style.transform = "scale(0.8)";
+            bg3d.style.filter = "grayscale(1) brightness(0.5)";
+            
+            setTimeout(() => {
+                main.style.display = "none";
+                final.style.display = "flex";
+                setTimeout(() => {
+                    final.style.background = "rgba(255, 255, 255, 0.92)";
+                    document.getElementById('nombre').style.opacity = "1";
+                    document.getElementById('nombre').style.transform = "translateY(0)";
+                    document.getElementById('btnS').style.opacity = "1";
+                }, 100);
+            }, 1000);
+        }
+
+        function startRain() {
+            setInterval(() => {
+                if(Math.random() > 0.6) {
+                    const img = document.createElement('img');
+                    img.src = misFotos[Math.floor(Math.random() * misFotos.length)];
+                    img.className = 'floating-photo';
+                    img.style.left = Math.random() * 100 + "vw";
+                    img.style.animationDuration = (Math.random() * 3 + 4) + "s";
+                    document.body.appendChild(img);
+                    setTimeout(() => img.remove(), 6000);
+                }
+            }, 600);
+        }
+    </script>
+</body>
+</html>
